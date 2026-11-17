@@ -23,25 +23,25 @@
 body {
     margin: 0;
     min-height: 100vh;
-    padding: 32px;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: Arial, sans-serif;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.ThemeSwitcher {
+.ThemeSwitcher,
+.LanguageSwitcher {
     display: inline-flex;
     gap: 8px;
     padding: 6px;
-    margin-top: 16px;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 999px;
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.ThemeOption {
+.ThemeOption,
+.LanguageOption {
     border: 1px solid transparent;
     border-radius: 999px;
     padding: 10px 18px;
@@ -52,16 +52,59 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.ThemeOption:hover {
+.ThemeOption:hover,
+.LanguageOption:hover {
     color: var(--text-primary);
 }
 
-.ThemeOption:active {
+.ThemeOption:active,
+.LanguageOption:active {
     transform: scale(0.98);
 }
 
-.ThemeOption.is-active {
+.ThemeOption.is-active,
+.LanguageOption.is-active {
     background-color: var(--accent-color);
     border-color: var(--accent-color);
     color: #ffffff;
+}
+
+.Header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 100;
+}
+
+.HeaderContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 clamp(16px, 2vw, 48px);
+}
+
+.HeaderLogo {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.HeaderSettings {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.MainContent {
+    padding-top: 80px;
+}
+
+
+html:not(.i18n-ready) [data-i18n] {
+    visibility: hidden;
 }

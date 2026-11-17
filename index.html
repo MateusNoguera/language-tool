@@ -6,23 +6,44 @@
     <title>Language Tool</title>
     <script>
         const savedTheme = localStorage.getItem("preferredTheme");
+        const savedLanguage = localStorage.getItem("preferredLanguage");
+
         document.documentElement.dataset.theme = savedTheme === "light" ? "light" : "dark";
+        document.documentElement.lang = savedLanguage === "en" ? "en" : "pt-BR";
+
     </script>
     <link rel="stylesheet" href="./src/style.css">
 </head>
+
 <body>
-    <h1>Language Tool</h1>
-    <p>Japanese Learning Platform</p>
-    <div class="ThemeSwitcher" role="group" aria-label="Theme switcher">
-        <button class="ThemeOption" id="lightThemeButton" type="button" data-theme-value="light">
-            Light
-        </button>
-        <button class="ThemeOption" id="darkThemeButton" type="button" data-theme-value="dark">
-            Dark
-        </button>
-        
-    </div>
+    <header class="Header">
+        <div class="HeaderContent">
+            <span class="HeaderLogo">Language Tool</span>
+
+            <div class="HeaderSettings">
+                <div class="LanguageSwitcher" role="group" aria-label="Language selector">
+                    <button class="LanguageOption" type="button" data-lang-value="pt-BR">PT-BR</button>
+                    <button class="LanguageOption" type="button" data-lang-value="en">EN</button>
+                </div>
+
+                <div class="ThemeSwitcher" role="group" aria-label="Theme switcher">
+                    <button class="ThemeOption" id="lightThemeButton" type="button" data-theme-value="light">Light</button>
+                    <button class="ThemeOption" id="darkThemeButton" type="button" data-theme-value="dark">Dark</button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <main class="MainContent">
+        <h1 data-i18n="welcomeTitle">Bem-vindo ao Language Tool</h1>
+        <p data-i18n="welcomeDescription">Sua plataforma de estudo de idiomas.</p>
+
+    </main>
 
     <script type="module" src="./dist/main.js"></script>
 </body>
+
 </html>
