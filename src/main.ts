@@ -4,4 +4,4 @@ function showMessage(message: string): void {
     console.log(message);
 }
 
-showMessage(`Project initialized: ${projectName}`);
+showMessage(`${projectName} initialized successfully!`);
