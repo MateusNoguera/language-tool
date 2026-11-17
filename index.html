@@ -48,6 +48,13 @@
                     </button>
                 </div>
 
+                <button class="SettingsButton" id="settingsButton" type="button" aria-label="Abrir configurações" aria-haspopup="dialog" aria-controls="settingsPanel" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 8.75A3.25 3.25 0 1 0 12 15.25A3.25 3.25 0 1 0 12 8.75Z"></path>
+                        <path d="M19.14 12.94C19.18 12.64 19.2 12.32 19.2 12C19.2 11.68 19.18 11.36 19.14 11.06L21.03 9.59C21.2 9.46 21.25 9.22 21.15 9.03L19.35 5.97C19.25 5.78 19.02 5.7 18.82 5.77L16.6 6.67C16.12 6.3 15.59 5.99 15.02 5.77L14.69 3.41C14.66 3.2 14.48 3.05 14.27 3.05H9.73C9.52 3.05 9.34 3.2 9.31 3.41L8.98 5.77C8.41 5.99 7.88 6.3 7.4 6.67L5.18 5.77C4.98 5.7 4.75 5.78 4.65 5.97L2.85 9.03C2.75 9.22 2.8 9.46 2.97 9.59L4.86 11.06C4.82 11.36 4.8 11.68 4.8 12C4.8 12.32 4.82 12.64 4.86 12.94L2.97 14.41C2.8 14.54 2.75 14.78 2.85 14.97L4.65 18.03C4.75 18.22 4.98 18.3 5.18 18.23L7.4 17.33C7.88 17.7 8.41 18.01 8.98 18.23L9.31 20.59C9.34 20.8 9.52 20.95 9.73 20.95H14.27C14.48 20.95 14.66 20.8 14.69 20.59L15.02 18.23C15.59 18.01 16.12 17.7 16.6 17.33L18.82 18.23C19.02 18.3 19.25 18.22 19.35 18.03L21.15 14.97C21.25 14.78 21.2 14.54 21.03 14.41L19.14 12.94Z"></path>
+                    </svg>
+                </button>
+
             </div>
 
         </div>
@@ -72,6 +79,23 @@
 
     </main>
 
+    <div class="SettingsOverlay" id="settingsOverlay" hidden></div>
+
+    <aside class="SettingsPanel" id="settingsPanel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+        <div class="SettingsHeader">
+            <h2 id="settingsTitle" data-i18n="settingsTitle">Configurações</h2>
+
+            <button class="SettingsCloseButton" id="settingsCloseButton" type="button" aria-label="Fechar configurações">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6L18 18"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="SettingsContent">
+            <p data-i18n="settingsDescription">Personalize sua experiência de estudo.</p>
+        </div>
+    </aside>
 
     <script type="module" src="./dist/main.js"></script>
 </body>

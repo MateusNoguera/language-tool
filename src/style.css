@@ -178,3 +178,116 @@ html:not(.i18n-ready) [data-i18n] {
     touch-action: none;
     cursor: crosshair;
 }
+
+.SettingsButton,
+.SettingsCloseButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.SettingsButton:hover,
+.SettingsCloseButton:hover {
+    background-color: var(--border-color);
+}
+
+.SettingsButton:active,
+.SettingsCloseButton:active {
+    transform: scale(0.96);
+}
+
+.SettingsButton:focus-visible,
+.SettingsCloseButton:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.SettingsButton svg,
+.SettingsCloseButton svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.SettingsOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.SettingsPanel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(420px, 100%);
+    height: 100dvh;
+    background-color: var(--bg-primary);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+    z-index: 201;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+}
+
+.SettingsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 80px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.SettingsHeader h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.SettingsContent {
+    padding: 24px;
+    color: var(--text-secondary);
+}
+
+.SettingsContent p {
+    margin: 0;
+}
+
+.SettingsOverlay[hidden],
+.SettingsPanel[hidden] {
+    display: none;
+}
+
+.SettingsPanel.is-open {
+    transform: translateX(0);
+}
+
+.SettingsOverlay.is-open {
+    opacity: 1;
+}
+
+body.settings-open {
+    overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .SettingsPanel,
+    .SettingsOverlay {
+        transition: none;
+    }
+}
