@@ -1,6 +1,8 @@
 const ptBR = {
     welcomeTitle: "Bem-vindo ao Language Tool",
-    welcomeDescription: "Sua plataforma de estudo de idiomas."
+    welcomeDescription: "Sua plataforma de estudo de idiomas.",
+    kanjiPracticeTitle: "Prática de Kanji",
+    kanjiPracticeDescription: "Desenhe o kanji apresentado abaixo."
 };
 
 type TranslationKey = keyof typeof ptBR;
@@ -10,7 +12,9 @@ export const translations = {
     "pt-BR": ptBR,
     "en": {
         welcomeTitle: "Welcome to Language Tool",
-        welcomeDescription: "Your language learning platform."
+        welcomeDescription: "Your language learning platform.",
+        kanjiPracticeTitle: "Kanji Practice",
+        kanjiPracticeDescription: "Draw the kanji shown below."
     }
 } satisfies Record<"pt-BR" | "en", TranslationDictionary>;
 

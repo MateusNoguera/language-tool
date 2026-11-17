@@ -100,11 +100,52 @@ body {
     gap: 16px;
 }
 
-.MainContent {
-    padding-top: 80px;
-}
-
-
 html:not(.i18n-ready) [data-i18n] {
     visibility: hidden;
+}
+
+.MainContent {
+    padding: 112px 24px 32px;
+}
+
+.KanjiPractice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.KanjiPractice h1,
+.KanjiPractice p {
+    margin: 0;
+}
+
+.KanjiReference {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    margin-top: 16px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 64px;
+}
+
+.CanvasContainer {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 16px;
+}
+
+#kanjiCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
 }

@@ -18,6 +18,7 @@ function setTheme(theme: Theme): void {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("preferredTheme", theme);
     updateThemeButtons(theme);
+    drawStrokes();
 }
 
 function updateLanguageButtons(language: Language): void {
@@ -77,3 +78,60 @@ languageButtons.forEach((button) => {
         }
     });
 });
+
+type Point = {
+    x: number;
+    y: number;
+};
+
+type Stroke = Point[];
+
+
+const strokes: Stroke[] = [
+    [
+        { x: 100, y: 100 },
+        { x: 150, y: 150 },
+        { x: 200, y: 200 },
+        { x: 250, y: 250 },
+        { x: 300, y: 300 }
+    ],
+    [
+        { x: 300, y: 100 },
+        { x: 250, y: 150 },
+        { x: 200, y: 200 },
+        { x: 150, y: 250 },
+        { x: 100, y: 300 }
+    ]
+];
+
+
+const canvas = document.querySelector<HTMLCanvasElement>("#kanjiCanvas");
+const ctx = canvas?.getContext("2d");
+
+function drawStrokes(): void {
+    if (!canvas || !ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const textColor = getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim();
+
+    ctx.strokeStyle = textColor;
+    ctx.lineWidth = 8;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    strokes.forEach((stroke) => {
+        if (stroke.length === 0) return;
+
+        ctx.beginPath();
+        ctx.moveTo(stroke[0].x, stroke[0].y);
+
+        for (let i = 1; i < stroke.length; i++) {
+            ctx.lineTo(stroke[i].x, stroke[i].y);
+        }
+
+        ctx.stroke();
+    });
+}
+
+drawStrokes();

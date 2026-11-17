@@ -37,11 +37,24 @@
 
     </header>
 
+    
     <main class="MainContent">
-        <h1 data-i18n="welcomeTitle">Bem-vindo ao Language Tool</h1>
-        <p data-i18n="welcomeDescription">Sua plataforma de estudo de idiomas.</p>
+        <section class="KanjiPractice">
+            <h1 data-i18n="kanjiPracticeTitle">Prática de Kanji</h1>
+            <p data-i18n="kanjiPracticeDescription">Desenhe o kanji apresentado abaixo.</p>
+
+            <div class="KanjiReference">
+                <span>日</span>
+            </div>
+
+            <div class="CanvasContainer">
+                <canvas id="kanjiCanvas" width="400" height="400"></canvas>
+            </div>
+            
+        </section>
 
     </main>
+
 
     <script type="module" src="./dist/main.js"></script>
 </body>
