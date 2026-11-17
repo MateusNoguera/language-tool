@@ -4,10 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Language Tool</title>
+    <script>
+        const savedTheme = localStorage.getItem("preferredTheme");
+        document.documentElement.dataset.theme = savedTheme === "light" ? "light" : "dark";
+    </script>
+    <link rel="stylesheet" href="./src/style.css">
 </head>
 <body>
     <h1>Language Tool</h1>
     <p>Japanese Learning Platform</p>
+    <div class="ThemeSwitcher" role="group" aria-label="Theme switcher">
+        <button class="ThemeOption" id="lightThemeButton" type="button" data-theme-value="light">
+            Light
+        </button>
+        <button class="ThemeOption" id="darkThemeButton" type="button" data-theme-value="dark">
+            Dark
+        </button>
+        
+    </div>
 
     <script type="module" src="./dist/main.js"></script>
 </body>
