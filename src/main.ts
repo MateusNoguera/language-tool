@@ -86,32 +86,60 @@ type Point = {
 
 type Stroke = Point[];
 
-
-const strokes: Stroke[] = [
-    [
-        { x: 100, y: 100 },
-        { x: 150, y: 150 },
-        { x: 200, y: 200 },
-        { x: 250, y: 250 },
-        { x: 300, y: 300 }
-    ],
-    [
-        { x: 300, y: 100 },
-        { x: 250, y: 150 },
-        { x: 200, y: 200 },
-        { x: 150, y: 250 },
-        { x: 100, y: 300 }
-    ]
-];
-
+const strokes: Stroke[] = [];
+let isDrawing: boolean = false;
 
 const canvas = document.querySelector<HTMLCanvasElement>("#kanjiCanvas");
 const ctx = canvas?.getContext("2d");
 
+const CANVAS_SIZE = 400;
+
+function resizeCanvas(): void {
+    if (!canvas || !ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+
+    ctx.setTransform(
+        canvas.width / CANVAS_SIZE,
+        0,
+        0,
+        canvas.height / CANVAS_SIZE,
+        0,
+        0
+    );
+
+    drawStrokes();
+}
+
+function getCanvasPoint(event: PointerEvent): Point | null {
+    if (!canvas) return null;
+
+    const rect = canvas.getBoundingClientRect();
+
+    if (rect.width === 0 || rect.height === 0) return null;
+
+    const x = (event.clientX - rect.left) * (CANVAS_SIZE / rect.width);
+    const y = (event.clientY - rect.top) * (CANVAS_SIZE / rect.height);
+
+    return {
+        x: Math.max(0, Math.min(CANVAS_SIZE, x)),
+        y: Math.max(0, Math.min(CANVAS_SIZE, y))
+    };
+}
+
 function drawStrokes(): void {
     if (!canvas || !ctx) return;
 
+    ctx.save();
+    ctx.resetTransform();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
 
     const textColor = getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim();
 
@@ -124,6 +152,14 @@ function drawStrokes(): void {
         if (stroke.length === 0) return;
 
         ctx.beginPath();
+
+        if (stroke.length === 1) {
+            ctx.arc(stroke[0].x, stroke[0].y, ctx.lineWidth / 2, 0, Math.PI * 2);
+            ctx.fillStyle = textColor;
+            ctx.fill();
+            return;
+        }
+
         ctx.moveTo(stroke[0].x, stroke[0].y);
 
         for (let i = 1; i < stroke.length; i++) {
@@ -131,7 +167,54 @@ function drawStrokes(): void {
         }
 
         ctx.stroke();
+
     });
 }
 
-drawStrokes();
+resizeCanvas();
+
+if (canvas) {
+    const resizeObserver = new ResizeObserver(() => {
+        resizeCanvas();
+    });
+
+    resizeObserver.observe(canvas);
+}
+
+function startDrawing(event: PointerEvent): void {
+    if (!canvas || event.button !== 0) return;
+
+    const point = getCanvasPoint(event);
+    if (!point) return;
+
+    isDrawing = true;
+    strokes.push([point]);
+
+    canvas.setPointerCapture(event.pointerId);
+    drawStrokes();
+}
+
+function continueDrawing(event: PointerEvent): void {
+    if (!isDrawing) return;
+
+    const point = getCanvasPoint(event);
+    if (!point) return;
+
+    const currentStroke = strokes[strokes.length - 1];
+    if (!currentStroke) return;
+
+    currentStroke.push(point);
+    drawStrokes();
+}
+
+function stopDrawing(): void {
+    isDrawing = false;
+}
+
+if (canvas) {
+    canvas.addEventListener("pointerdown", startDrawing);
+    canvas.addEventListener("pointermove", continueDrawing);
+    canvas.addEventListener("pointerup", stopDrawing);
+    canvas.addEventListener("pointercancel", stopDrawing);
+    canvas.addEventListener("lostpointercapture", stopDrawing);
+}
