@@ -7,11 +7,7 @@ const languageButtons = document.querySelectorAll<HTMLButtonElement>(".LanguageO
 
 const settingsButton = document.querySelector<HTMLButtonElement>("#settingsButton");
 const settingsCloseButton = document.querySelector<HTMLButtonElement>("#settingsCloseButton");
-const settingsPanel = document.querySelector<HTMLElement>("#settingsPanel");
-const settingsOverlay = document.querySelector<HTMLElement>("#settingsOverlay");
-
-let settingsOpen = false;
-let settingsCloseController: AbortController | null = null;
+const settingsPanel = document.querySelector<HTMLDialogElement>("#settingsPanel");
 
 function updateThemeButtons(theme: Theme): void {
     themeButtons.forEach((button) => {
@@ -223,71 +219,17 @@ function stopDrawing(): void {
 }
 
 function openSettings(): void {
-    if (!settingsPanel || !settingsOverlay || !settingsCloseButton || settingsOpen) return;
+    if (!settingsPanel || settingsPanel.open) return;
 
-    settingsCloseController?.abort();
-    settingsCloseController = null;
-
-    settingsOpen = true;
-
-    settingsPanel.hidden = false;
-    settingsOverlay.hidden = false;
-
-    document.querySelector<HTMLElement>(".Header")?.setAttribute("inert", "");
-    document.querySelector<HTMLElement>(".MainContent")?.setAttribute("inert", "");
-
-    document.body.classList.add("settings-open");
+    settingsPanel.showModal();
     settingsButton?.setAttribute("aria-expanded", "true");
-
-    settingsPanel.getBoundingClientRect();
-
-    settingsPanel.classList.add("is-open");
-    settingsOverlay.classList.add("is-open");
-
-    settingsCloseButton.focus();
+    settingsCloseButton?.focus();
 }
 
 function closeSettings(): void {
-    if (!settingsPanel || !settingsOverlay || !settingsOpen) return;
+    if (!settingsPanel || !settingsPanel.open) return;
 
-    settingsOpen = false;
-
-    settingsPanel.classList.remove("is-open");
-    settingsOverlay.classList.remove("is-open");
-
-    document.body.classList.remove("settings-open");
-    settingsButton?.setAttribute("aria-expanded", "false");
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = getComputedStyle(settingsPanel).transitionDuration;
-
-    if (reducedMotion || duration.split(",").every((value) => parseFloat(value) === 0)) {
-        finishClosingSettings();
-        return;
-    }
-
-    settingsCloseController = new AbortController();
-
-    settingsPanel.addEventListener("transitionend", (event: TransitionEvent) => {
-        if (event.target !== settingsPanel || event.propertyName !== "transform") return;
-
-        finishClosingSettings();
-    }, { signal: settingsCloseController.signal });
-}
-
-function finishClosingSettings(): void {
-    if (!settingsPanel || !settingsOverlay || settingsOpen) return;
-
-    settingsPanel.hidden = true;
-    settingsOverlay.hidden = true;
-
-    document.querySelector<HTMLElement>(".Header")?.removeAttribute("inert");
-    document.querySelector<HTMLElement>(".MainContent")?.removeAttribute("inert");
-
-    settingsCloseController?.abort();
-    settingsCloseController = null;
-
-    settingsButton?.focus();
+    settingsPanel.close();
 }
 
 if (canvas) {
@@ -300,20 +242,36 @@ if (canvas) {
 
 settingsButton?.addEventListener("click", openSettings);
 settingsCloseButton?.addEventListener("click", closeSettings);
-settingsOverlay?.addEventListener("click", closeSettings);
 
-document.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape" && settingsOpen) {
+settingsPanel?.addEventListener("close", () => {
+    settingsButton?.setAttribute("aria-expanded", "false");
+    settingsButton?.focus();
+});
+
+settingsPanel?.addEventListener("click", (event: MouseEvent) => {
+    if (event.target !== settingsPanel) return;
+
+    const rect = settingsPanel.getBoundingClientRect();
+
+    const clickedOutside =
+        event.clientX < rect.left ||
+        event.clientX > rect.right ||
+        event.clientY < rect.top ||
+        event.clientY > rect.bottom;
+
+    if (clickedOutside) {
         closeSettings();
     }
 });
 
 settingsPanel?.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key !== "Tab" || !settingsPanel || settingsPanel.hidden) return;
+    if (event.key !== "Tab" || !settingsPanel.open) return;
 
-    const focusableElements = Array.from(settingsPanel.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        )).filter((element) => element.getClientRects().length > 0);
+    const focusableElements = Array.from(
+        settingsPanel.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+    ).filter((element) => element.getClientRects().length > 0 && !element.closest("[inert]"));
 
     if (focusableElements.length === 0) {
         event.preventDefault();

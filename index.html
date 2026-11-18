@@ -78,10 +78,8 @@
         </section>
 
     </main>
-
-    <div class="SettingsOverlay" id="settingsOverlay" hidden></div>
-
-    <aside class="SettingsPanel" id="settingsPanel" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+    
+    <dialog class="SettingsPanel" id="settingsPanel" aria-labelledby="settingsTitle">
         <div class="SettingsHeader">
             <h2 id="settingsTitle" data-i18n="settingsTitle">Configurações</h2>
 
@@ -95,7 +93,7 @@
         <div class="SettingsContent">
             <p data-i18n="settingsDescription">Personalize sua experiência de estudo.</p>
         </div>
-    </aside>
+    </dialog>
 
     <script type="module" src="./dist/main.js"></script>
 </body>

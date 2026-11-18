@@ -221,28 +221,26 @@ html:not(.i18n-ready) [data-i18n] {
     stroke-linejoin: round;
 }
 
-.SettingsOverlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    z-index: 200;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
 .SettingsPanel {
     position: fixed;
     top: 0;
     right: 0;
     width: min(420px, 100%);
     height: 100dvh;
+    max-height: none;
+    margin: 0 0 0 auto;
+    padding: 0;
     background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: none;
     border-left: 1px solid var(--border-color);
     box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
-    z-index: 201;
     overflow-y: auto;
     transform: translateX(100%);
-    transition: transform 0.25s ease;
+    transition:
+        transform 0.25s ease,
+        display 0.25s allow-discrete,
+        overlay 0.25s allow-discrete;
 }
 
 .SettingsHeader {
@@ -268,26 +266,37 @@ html:not(.i18n-ready) [data-i18n] {
     margin: 0;
 }
 
-.SettingsOverlay[hidden],
-.SettingsPanel[hidden] {
-    display: none;
+.SettingsPanel::backdrop {
+    background-color: transparent;
+    transition:
+        background-color 0.25s ease,
+        display 0.25s allow-discrete,
+        overlay 0.25s allow-discrete;
 }
 
-.SettingsPanel.is-open {
+.SettingsPanel[open]::backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+@starting-style {
+    .SettingsPanel[open]::backdrop {
+        background-color: transparent;
+    }
+}
+
+.SettingsPanel[open] {
     transform: translateX(0);
 }
 
-.SettingsOverlay.is-open {
-    opacity: 1;
-}
-
-body.settings-open {
-    overflow: hidden;
+@starting-style {
+    .SettingsPanel[open] {
+        transform: translateX(100%);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .SettingsPanel,
-    .SettingsOverlay {
+    .SettingsPanel::backdrop {
         transition: none;
     }
 }
