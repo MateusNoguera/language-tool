@@ -1,13 +1,30 @@
 import { translations, type Language, type TranslationKey } from "./translations.js";
 
 type Theme = "light" | "dark";
+type GridMode = "none" | "four" | "sixteen" | "diagonal";
 
 const themeButtons = document.querySelectorAll<HTMLButtonElement>(".ThemeOption");
 const languageButtons = document.querySelectorAll<HTMLButtonElement>(".LanguageOption");
+const gridOptions = document.querySelectorAll<HTMLInputElement>('input[name="gridMode"]');
+const canvasContainer = document.querySelector<HTMLElement>(".CanvasContainer");
 
 const settingsButton = document.querySelector<HTMLButtonElement>("#settingsButton");
 const settingsCloseButton = document.querySelector<HTMLButtonElement>("#settingsCloseButton");
 const settingsPanel = document.querySelector<HTMLDialogElement>("#settingsPanel");
+
+function isGridMode(value: string): value is GridMode {
+    return value === "none" || value === "four" || value === "sixteen" || value === "diagonal";
+}
+
+function setGridMode(mode: GridMode): void {
+    localStorage.setItem("preferredGridMode", mode);
+
+    if (canvasContainer) canvasContainer.dataset.gridMode = mode;
+
+    gridOptions.forEach((option) => {
+        option.checked = option.value === mode;
+    });
+}
 
 function updateThemeButtons(theme: Theme): void {
     themeButtons.forEach((button) => {
@@ -64,6 +81,11 @@ const initialTheme: Theme = document.documentElement.dataset.theme === "light" ?
 const initialLanguage: Language = document.documentElement.lang === "en" ? "en" : "pt-BR";
 updateThemeButtons(initialTheme);
 setLanguage(initialLanguage);
+
+const savedGridMode = localStorage.getItem("preferredGridMode");
+const initialGridMode: GridMode = savedGridMode && isGridMode(savedGridMode) ? savedGridMode : "four";
+setGridMode(initialGridMode);
+
 document.documentElement.classList.add("i18n-ready");
 
 themeButtons.forEach((button) => {
@@ -82,6 +104,14 @@ languageButtons.forEach((button) => {
 
         if (languageValue === "pt-BR" || languageValue === "en") {
             setLanguage(languageValue);
+        }
+    });
+});
+
+gridOptions.forEach((option) => {
+    option.addEventListener("change", () => {
+        if (option.checked && isGridMode(option.value)) {
+            setGridMode(option.value);
         }
     });
 });

@@ -6,7 +6,14 @@ const ptBR = {
     settingsTitle: "Configurações",
     settingsDescription: "Personalize sua experiência de estudo.",
     openSettings: "Abrir configurações",
-    closeSettings: "Fechar configurações"
+    closeSettings: "Fechar configurações",
+    kanjiSettingsTitle: "Escrita de Kanji",
+    gridSettingsTitle: "Grade de orientação",
+    gridSettingsDescription: "Escolha as linhas de referência para ajudar no posicionamento dos traços.",
+    gridNone: "Sem grade",
+    gridFour: "4 quadrantes (2 x 2)",
+    gridSixteen: "16 quadrantes (4 x 4)",
+    gridDiagonal: "4 quadrantes + diagonais"
 };
 
 type TranslationKey = keyof typeof ptBR;
@@ -22,7 +29,14 @@ export const translations = {
         settingsTitle: "Settings",
         settingsDescription: "Customize your learning experience.",
         openSettings: "Open settings",
-        closeSettings: "Close settings"
+        closeSettings: "Close settings",
+        kanjiSettingsTitle: "Kanji Writing",
+        gridSettingsTitle: "Guideline Grid",
+        gridSettingsDescription: "Choose reference lines to help position your strokes.",
+        gridNone: "No grid",
+        gridFour: "4 quadrants (2 x 2)",
+        gridSixteen: "16 quadrants (4 x 4)",
+        gridDiagonal: "4 quadrants + diagonals"
     }
 } satisfies Record<"pt-BR" | "en", TranslationDictionary>;
 
