@@ -448,3 +448,27 @@ html:not(.i18n-ready) [data-i18n] {
     stroke-linejoin: round;
     flex-shrink: 0;
 }
+
+.CanvasToolButton.is-selected {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.EraserCursor {
+    position: absolute;
+    z-index: 2;
+    width: 5%;
+    aspect-ratio: 1;
+    border: 1.5px solid var(--accent-color);
+    border-radius: 50%;
+    background-color: rgba(59, 130, 246, 0.15);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+.EraserCursor[hidden] {
+    display: none;
+}
+.CanvasContainer[data-tool="erase"] #kanjiCanvas {
+    cursor: none;
+}

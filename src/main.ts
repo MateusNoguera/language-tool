@@ -2,6 +2,7 @@ import { translations, type Language, type TranslationKey } from "./translations
 
 type Theme = "light" | "dark";
 type GridMode = "none" | "four" | "sixteen" | "diagonal";
+type CanvasTool = "draw" | "erase";
 
 const themeButtons = document.querySelectorAll<HTMLButtonElement>(".ThemeOption");
 const languageButtons = document.querySelectorAll<HTMLButtonElement>(".LanguageOption");
@@ -15,6 +16,9 @@ const settingsPanel = document.querySelector<HTMLDialogElement>("#settingsPanel"
 const undoButton = document.querySelector<HTMLButtonElement>("#undoButton");
 const redoButton = document.querySelector<HTMLButtonElement>("#redoButton");
 const clearButton = document.querySelector<HTMLButtonElement>("#clearButton");
+const drawToolButton = document.querySelector<HTMLButtonElement>("#drawToolButton");
+const eraserToolButton = document.querySelector<HTMLButtonElement>("#eraserToolButton");
+const eraserCursor = document.querySelector<HTMLElement>("#eraserCursor");
 
 function isGridMode(value: string): value is GridMode {
     return value === "none" || value === "four" || value === "sixteen" || value === "diagonal";
@@ -129,6 +133,10 @@ type Stroke = Point[];
 
 const strokes: Stroke[] = [];
 let isDrawing: boolean = false;
+let activeTool: CanvasTool = "draw";
+let isErasing = false;
+let lastEraserPoint: Point | null = null;
+let hasErasedInGesture = false;
 const history: Stroke[][] = [];
 const redoHistory: Stroke[][] = [];
 
@@ -140,39 +148,29 @@ function saveHistory(): void {
 }
 
 function undo(): void {
-    if (isDrawing || history.length === 0) return;
-
+    if (isDrawing || isErasing || history.length === 0) return;
     const previousState = history.pop();
     if (!previousState) return;
-
-    const currentState = strokes.map((stroke) => stroke.map((point) => ({ ...point })));
-    redoHistory.push(currentState);
-
+    redoHistory.push(strokes.map(stroke => stroke.map(point => ({ ...point }))));
     strokes.length = 0;
     strokes.push(...previousState);
-
     drawStrokes();
     updateHistoryButtons();
 }
 
 function redo(): void {
-    if (isDrawing || redoHistory.length === 0) return;
-
+    if (isDrawing || isErasing || redoHistory.length === 0) return;
     const nextState = redoHistory.pop();
     if (!nextState) return;
-
-    const currentState = strokes.map((stroke) => stroke.map((point) => ({ ...point })));
-    history.push(currentState);
-
+    history.push(strokes.map(stroke => stroke.map(point => ({ ...point }))));
     strokes.length = 0;
     strokes.push(...nextState);
-
     drawStrokes();
     updateHistoryButtons();
 }
 
 function clearCanvas(): void {
-    if (isDrawing || strokes.length === 0) return;
+    if (isDrawing || isErasing || strokes.length === 0) return;
 
     saveHistory();
     strokes.length = 0;
@@ -182,21 +180,82 @@ function clearCanvas(): void {
 }
 
 function updateHistoryButtons(): void {
-    if (undoButton) {
-        undoButton.disabled = isDrawing || history.length === 0;
+    if (undoButton) undoButton.disabled = isDrawing || isErasing || history.length === 0;
+    if (redoButton) redoButton.disabled = isDrawing || isErasing || redoHistory.length === 0;
+    if (clearButton) clearButton.disabled = isDrawing || isErasing || strokes.length === 0;
+}
+
+function setCanvasTool(tool: CanvasTool): void {
+    if (isDrawing || isErasing) return;
+    activeTool = tool;
+    if (canvasContainer) canvasContainer.dataset.tool = tool;
+    hideEraserCursor();
+    drawToolButton?.classList.toggle("is-selected", tool === "draw");
+    eraserToolButton?.classList.toggle("is-selected", tool === "erase");
+    drawToolButton?.setAttribute("aria-pressed", String(tool === "draw"));
+    eraserToolButton?.setAttribute("aria-pressed", String(tool === "erase"));
+}
+
+function checkEraserCollision(point: Point): void {
+    const previousPoint = lastEraserPoint ?? point;
+    const touched = findTouchedStrokes(previousPoint, point);
+    if (touched.length > 0) {
+        if (!hasErasedInGesture) {
+            saveHistory();
+            hasErasedInGesture = true;
+        }
+        touched.sort((a, b) => b - a);
+        touched.forEach((index) => strokes.splice(index, 1));
+        drawStrokes();
+        updateHistoryButtons();
     }
-    if (redoButton) {
-        redoButton.disabled = isDrawing || redoHistory.length === 0;
-    }
-    if (clearButton) {
-        clearButton.disabled = isDrawing || strokes.length === 0;
-    }
+    lastEraserPoint = point;
+}
+
+function startErasing(event: PointerEvent): void {
+    if (!canvas || event.button !== 0 || isErasing) return;
+    const point = getCanvasPoint(event);
+    if (!point) return;
+    isErasing = true;
+    hasErasedInGesture = false;
+    lastEraserPoint = point;
+    canvas.setPointerCapture(event.pointerId);
+    updateHistoryButtons();
+    checkEraserCollision(point);
+}
+
+function continueErasing(event: PointerEvent): void {
+    if (!isErasing) return;
+    const point = getCanvasPoint(event);
+    if (!point) return;
+    checkEraserCollision(point);
+}
+
+function stopErasing(): void {
+    isErasing = false;
+    hasErasedInGesture = false;
+    lastEraserPoint = null;
+    updateHistoryButtons();
+}
+
+function updateEraserCursor(event: PointerEvent): void {
+    if (!eraserCursor || activeTool !== "erase") return;
+    const point = getCanvasPoint(event);
+    if (!point) return;
+    eraserCursor.style.left = `${(point.x / CANVAS_SIZE) * 100}%`;
+    eraserCursor.style.top = `${(point.y / CANVAS_SIZE) * 100}%`;
+    eraserCursor.hidden = false;
+}
+function hideEraserCursor(): void {
+    if (eraserCursor) eraserCursor.hidden = true;
 }
 
 const canvas = document.querySelector<HTMLCanvasElement>("#kanjiCanvas");
 const ctx = canvas?.getContext("2d");
 
 const CANVAS_SIZE = 400;
+const STROKE_WIDTH = 8;
+const ERASER_RADIUS = 10;
 
 function resizeCanvas(): void {
     if (!canvas || !ctx) return;
@@ -237,6 +296,62 @@ function getCanvasPoint(event: PointerEvent): Point | null {
     };
 }
 
+function pointToSegmentDistanceSquared(point: Point, start: Point, end: Point): number {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const lengthSquared = dx * dx + dy * dy;
+    if (lengthSquared === 0) {
+        return (point.x - start.x) ** 2 + (point.y - start.y) ** 2;
+    }
+    const projection = ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared;
+    const t = Math.max(0, Math.min(1, projection));
+    const closestX = start.x + t * dx;
+    const closestY = start.y + t * dy;
+    return (point.x - closestX) ** 2 + (point.y - closestY) ** 2;
+}
+
+function segmentsIntersect(a: Point, b: Point, c: Point, d: Point): boolean {
+    const rx = b.x - a.x;
+    const ry = b.y - a.y;
+    const sx = d.x - c.x;
+    const sy = d.y - c.y;
+    const denominator = rx * sy - ry * sx;
+    if (Math.abs(denominator) < 1e-10) return false;
+    const qx = c.x - a.x;
+    const qy = c.y - a.y;
+    const t = (qx * sy - qy * sx) / denominator;
+    const u = (qx * ry - qy * rx) / denominator;
+    return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+function segmentDistanceSquared(a: Point, b: Point, c: Point, d: Point): number {
+    if (segmentsIntersect(a, b, c, d)) return 0;
+    return Math.min(
+        pointToSegmentDistanceSquared(a, c, d),
+        pointToSegmentDistanceSquared(b, c, d),
+        pointToSegmentDistanceSquared(c, a, b),
+        pointToSegmentDistanceSquared(d, a, b)
+    );
+}
+
+function findTouchedStrokes(start: Point, end: Point): number[] {
+    const touched: number[] = [];
+    const collisionRadius = ERASER_RADIUS + STROKE_WIDTH / 2;
+    const collisionDistanceSquared = collisionRadius ** 2;
+    strokes.forEach((stroke, index) => {
+        if (stroke.length === 0) return;
+        for (let i = 0; i < stroke.length; i++) {
+            const a = stroke[i];
+            const b = stroke[i + 1] ?? a;
+            if (segmentDistanceSquared(start, end, a, b) <= collisionDistanceSquared) {
+                touched.push(index);
+                break;
+            }
+        }
+    });
+    return touched;
+}
+
 function drawStrokes(): void {
     if (!canvas || !ctx) return;
 
@@ -248,7 +363,7 @@ function drawStrokes(): void {
     const textColor = getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim();
 
     ctx.strokeStyle = textColor;
-    ctx.lineWidth = 8;
+    ctx.lineWidth = STROKE_WIDTH;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
@@ -286,6 +401,10 @@ if (canvas) {
 }
 
 function startDrawing(event: PointerEvent): void {
+    if (activeTool === "erase") {
+        startErasing(event);
+        return;
+    }
     if (!canvas || event.button !== 0) return;
 
     const point = getCanvasPoint(event);
@@ -301,6 +420,11 @@ function startDrawing(event: PointerEvent): void {
 }
 
 function continueDrawing(event: PointerEvent): void {
+    if (activeTool === "erase") {
+        continueErasing(event);
+        return;
+    }
+
     if (!isDrawing) return;
 
     const point = getCanvasPoint(event);
@@ -314,6 +438,11 @@ function continueDrawing(event: PointerEvent): void {
 }
 
 function stopDrawing(): void {
+    if (isErasing) {
+        stopErasing();
+        return;
+    }
+
     if (!isDrawing) return;
     isDrawing = false;
     updateHistoryButtons();
@@ -339,6 +468,9 @@ if (canvas) {
     canvas.addEventListener("pointerup", stopDrawing);
     canvas.addEventListener("pointercancel", stopDrawing);
     canvas.addEventListener("lostpointercapture", stopDrawing);
+    canvas.addEventListener("pointerenter", updateEraserCursor);
+    canvas.addEventListener("pointermove", updateEraserCursor);
+    canvas.addEventListener("pointerleave", hideEraserCursor);
 }
 
 settingsButton?.addEventListener("click", openSettings);
@@ -422,5 +554,8 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 undoButton?.addEventListener("click", undo);
 redoButton?.addEventListener("click", redo);
 clearButton?.addEventListener("click", clearCanvas);
+drawToolButton?.addEventListener("click", () => setCanvasTool("draw"));
+eraserToolButton?.addEventListener("click", () => setCanvasTool("erase"));
+setCanvasTool(activeTool);
 
 updateHistoryButtons();
