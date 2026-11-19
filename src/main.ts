@@ -12,6 +12,9 @@ const settingsButton = document.querySelector<HTMLButtonElement>("#settingsButto
 const settingsCloseButton = document.querySelector<HTMLButtonElement>("#settingsCloseButton");
 const settingsPanel = document.querySelector<HTMLDialogElement>("#settingsPanel");
 
+const undoButton = document.querySelector<HTMLButtonElement>("#undoButton");
+const redoButton = document.querySelector<HTMLButtonElement>("#redoButton");
+
 function isGridMode(value: string): value is GridMode {
     return value === "none" || value === "four" || value === "sixteen" || value === "diagonal";
 }
@@ -125,6 +128,56 @@ type Stroke = Point[];
 
 const strokes: Stroke[] = [];
 let isDrawing: boolean = false;
+const history: Stroke[][] = [];
+const redoHistory: Stroke[][] = [];
+
+function saveHistory(): void {
+    const snapshot = strokes.map((stroke) => stroke.map((point) => ({ ...point })));
+    history.push(snapshot);
+    redoHistory.length = 0;
+    updateHistoryButtons();
+}
+
+function undo(): void {
+    if (isDrawing || history.length === 0) return;
+
+    const previousState = history.pop();
+    if (!previousState) return;
+
+    const currentState = strokes.map((stroke) => stroke.map((point) => ({ ...point })));
+    redoHistory.push(currentState);
+
+    strokes.length = 0;
+    strokes.push(...previousState);
+
+    drawStrokes();
+    updateHistoryButtons();
+}
+
+function redo(): void {
+    if (isDrawing || redoHistory.length === 0) return;
+
+    const nextState = redoHistory.pop();
+    if (!nextState) return;
+
+    const currentState = strokes.map((stroke) => stroke.map((point) => ({ ...point })));
+    history.push(currentState);
+
+    strokes.length = 0;
+    strokes.push(...nextState);
+
+    drawStrokes();
+    updateHistoryButtons();
+}
+
+function updateHistoryButtons(): void {
+    if (undoButton) {
+        undoButton.disabled = isDrawing || history.length === 0;
+    }
+    if (redoButton) {
+        redoButton.disabled = isDrawing || redoHistory.length === 0;
+    }
+}
 
 const canvas = document.querySelector<HTMLCanvasElement>("#kanjiCanvas");
 const ctx = canvas?.getContext("2d");
@@ -224,7 +277,9 @@ function startDrawing(event: PointerEvent): void {
     const point = getCanvasPoint(event);
     if (!point) return;
 
+    saveHistory();
     isDrawing = true;
+    updateHistoryButtons();
     strokes.push([point]);
 
     canvas.setPointerCapture(event.pointerId);
@@ -245,7 +300,9 @@ function continueDrawing(event: PointerEvent): void {
 }
 
 function stopDrawing(): void {
+    if (!isDrawing) return;
     isDrawing = false;
+    updateHistoryButtons();
 }
 
 function openSettings(): void {
@@ -319,3 +376,36 @@ settingsPanel?.addEventListener("keydown", (event: KeyboardEvent) => {
         firstElement.focus();
     }
 });
+
+document.addEventListener("keydown", (event: KeyboardEvent) => {
+    const modifier = event.ctrlKey || event.metaKey;
+    const key = event.key.toLowerCase();
+    
+    if (event.altKey) return;
+
+    const isUndo = modifier && key === "z" && !event.shiftKey;
+    const isRedo = modifier && ((key === "y" && !event.shiftKey) || (key === "z" && event.shiftKey));
+
+    if (!isUndo && !isRedo) return;
+
+    const target = event.target;
+
+    if (target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA"].includes(target.tagName))) {
+        return;
+    }
+
+    if (settingsPanel?.open || isDrawing) return;
+
+    event.preventDefault();
+
+    if (isUndo) {
+        undo();
+    } else {
+        redo();
+    }
+});
+
+undoButton?.addEventListener("click", undo);
+redoButton?.addEventListener("click", redo);
+
+updateHistoryButtons();

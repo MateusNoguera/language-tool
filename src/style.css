@@ -399,3 +399,49 @@ html:not(.i18n-ready) [data-i18n] {
 .CanvasContainer[data-grid-mode="diagonal"] .GridDiagonal {
     display: initial;
 }
+
+.CanvasToolbar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 8px;
+}
+.CanvasToolButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    min-height: 44px;
+    padding: 10px 16px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+.CanvasToolButton:hover:not(:disabled) {
+    border-color: var(--accent-color);
+}
+.CanvasToolButton:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+.CanvasToolButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.CanvasToolButton svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}

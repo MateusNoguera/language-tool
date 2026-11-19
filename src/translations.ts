@@ -13,7 +13,9 @@ const ptBR = {
     gridNone: "Sem grade",
     gridFour: "4 quadrantes (2 x 2)",
     gridSixteen: "16 quadrantes (4 x 4)",
-    gridDiagonal: "4 quadrantes + diagonais"
+    gridDiagonal: "4 quadrantes + diagonais",
+    undo: "Desfazer",
+    redo: "Refazer"
 };
 
 type TranslationKey = keyof typeof ptBR;
@@ -36,7 +38,9 @@ export const translations = {
         gridNone: "No grid",
         gridFour: "4 quadrants (2 x 2)",
         gridSixteen: "16 quadrants (4 x 4)",
-        gridDiagonal: "4 quadrants + diagonals"
+        gridDiagonal: "4 quadrants + diagonals",
+        undo: "Undo",
+        redo: "Redo"
     }
 } satisfies Record<"pt-BR" | "en", TranslationDictionary>;
 
