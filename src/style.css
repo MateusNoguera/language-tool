@@ -407,13 +407,16 @@ html:not(.i18n-ready) [data-i18n] {
     width: 100%;
     max-width: 400px;
     margin-top: 8px;
+    flex-wrap: wrap;
 }
+
 .CanvasToolButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     flex: 1;
+    min-width: 100px;
     min-height: 44px;
     padding: 10px 16px;
     background-color: var(--bg-secondary);

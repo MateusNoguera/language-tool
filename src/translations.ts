@@ -15,7 +15,8 @@ const ptBR = {
     gridSixteen: "16 quadrantes (4 x 4)",
     gridDiagonal: "4 quadrantes + diagonais",
     undo: "Desfazer",
-    redo: "Refazer"
+    redo: "Refazer",
+    clear: "Limpar"
 };
 
 type TranslationKey = keyof typeof ptBR;
@@ -40,7 +41,8 @@ export const translations = {
         gridSixteen: "16 quadrants (4 x 4)",
         gridDiagonal: "4 quadrants + diagonals",
         undo: "Undo",
-        redo: "Redo"
+        redo: "Redo",
+        clear: "Clear"
     }
 } satisfies Record<"pt-BR" | "en", TranslationDictionary>;
 

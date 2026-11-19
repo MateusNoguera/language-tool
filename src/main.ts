@@ -14,6 +14,7 @@ const settingsPanel = document.querySelector<HTMLDialogElement>("#settingsPanel"
 
 const undoButton = document.querySelector<HTMLButtonElement>("#undoButton");
 const redoButton = document.querySelector<HTMLButtonElement>("#redoButton");
+const clearButton = document.querySelector<HTMLButtonElement>("#clearButton");
 
 function isGridMode(value: string): value is GridMode {
     return value === "none" || value === "four" || value === "sixteen" || value === "diagonal";
@@ -170,12 +171,25 @@ function redo(): void {
     updateHistoryButtons();
 }
 
+function clearCanvas(): void {
+    if (isDrawing || strokes.length === 0) return;
+
+    saveHistory();
+    strokes.length = 0;
+
+    drawStrokes();
+    updateHistoryButtons();
+}
+
 function updateHistoryButtons(): void {
     if (undoButton) {
         undoButton.disabled = isDrawing || history.length === 0;
     }
     if (redoButton) {
         redoButton.disabled = isDrawing || redoHistory.length === 0;
+    }
+    if (clearButton) {
+        clearButton.disabled = isDrawing || strokes.length === 0;
     }
 }
 
@@ -407,5 +421,6 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 
 undoButton?.addEventListener("click", undo);
 redoButton?.addEventListener("click", redo);
+clearButton?.addEventListener("click", clearCanvas);
 
 updateHistoryButtons();
