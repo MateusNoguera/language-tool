@@ -129,6 +129,15 @@ type Point = {
     y: number;
 };
 
+type StrokeMetrics = {
+    start: Point;
+    end: Point;
+    length: number;
+    width: number;
+    height: number;
+    center: Point;
+};
+
 type Stroke = Point[];
 
 const strokes: Stroke[] = [];
@@ -250,8 +259,46 @@ function updateEraserCursor(event: PointerEvent): void {
     eraserCursor.style.top = `${(point.y / CANVAS_SIZE) * 100}%`;
     eraserCursor.hidden = false;
 }
+
 function hideEraserCursor(): void {
     if (eraserCursor) eraserCursor.hidden = true;
+}
+
+function getStrokeMetrics(stroke: Stroke): StrokeMetrics | null {
+    if (stroke.length === 0) return null;
+
+    const start = stroke[0];
+    const end = stroke[stroke.length - 1];
+
+    let minX = start.x;
+    let maxX = start.x;
+    let minY = start.y;
+    let maxY = start.y;
+    let length = 0;
+
+    for (let i = 1; i < stroke.length; i++) {
+        const previous = stroke[i - 1];
+        const current = stroke[i];
+
+        minX = Math.min(minX, current.x);
+        maxX = Math.max(maxX, current.x);
+        minY = Math.min(minY, current.y);
+        maxY = Math.max(maxY, current.y);
+
+        length += Math.hypot(current.x - previous.x, current.y - previous.y);
+    }
+
+    return {
+        start: { ...start },
+        end: { ...end },
+        length,
+        width: maxX - minX,
+        height: maxY - minY,
+        center: {
+            x: (minX + maxX) / 2,
+            y: (minY + maxY) / 2
+        }
+    };
 }
 
 const canvas = document.querySelector<HTMLCanvasElement>("#kanjiCanvas");
