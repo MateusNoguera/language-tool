@@ -134,6 +134,7 @@ type Stroke = Point[];
 const strokes: Stroke[] = [];
 let isDrawing: boolean = false;
 let activeTool: CanvasTool = "draw";
+let activePointerId: number | null = null;
 let isErasing = false;
 let lastEraserPoint: Point | null = null;
 let hasErasedInGesture = false;
@@ -213,10 +214,11 @@ function checkEraserCollision(point: Point): void {
 }
 
 function startErasing(event: PointerEvent): void {
-    if (!canvas || event.button !== 0 || isErasing) return;
+    if (!canvas || event.button !== 0 || activePointerId !== null) return;
     const point = getCanvasPoint(event);
     if (!point) return;
     isErasing = true;
+    activePointerId = event.pointerId;
     hasErasedInGesture = false;
     lastEraserPoint = point;
     canvas.setPointerCapture(event.pointerId);
@@ -225,6 +227,8 @@ function startErasing(event: PointerEvent): void {
 }
 
 function continueErasing(event: PointerEvent): void {
+    if (event.pointerId !== activePointerId) return;
+
     if (!isErasing) return;
     const point = getCanvasPoint(event);
     if (!point) return;
@@ -401,6 +405,8 @@ if (canvas) {
 }
 
 function startDrawing(event: PointerEvent): void {
+    if (activePointerId !== null) return;
+
     if (activeTool === "erase") {
         startErasing(event);
         return;
@@ -412,6 +418,7 @@ function startDrawing(event: PointerEvent): void {
 
     saveHistory();
     isDrawing = true;
+    activePointerId = event.pointerId;
     updateHistoryButtons();
     strokes.push([point]);
 
@@ -420,6 +427,8 @@ function startDrawing(event: PointerEvent): void {
 }
 
 function continueDrawing(event: PointerEvent): void {
+    if (event.pointerId !== activePointerId) return;
+
     if (activeTool === "erase") {
         continueErasing(event);
         return;
@@ -437,7 +446,10 @@ function continueDrawing(event: PointerEvent): void {
     drawStrokes();
 }
 
-function stopDrawing(): void {
+function stopDrawing(event: PointerEvent): void {
+    if (event.pointerId !== activePointerId) return;
+    activePointerId = null;
+
     if (isErasing) {
         stopErasing();
         return;
