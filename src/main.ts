@@ -1,4 +1,9 @@
 import { translations, type Language, type TranslationKey } from "./translations.js";
+import { loadKanjiSvg } from "./kanji/kanjiSvgLoader.js";
+import { convertKanjiSvgToPoints } from "./kanji/kanjiGeometry.js";
+import { normalizeDrawing } from "./kanji/kanjiNormalization.js";
+import { prepareKanjiForComparison } from "./kanji/kanjiPreparation.js";
+import { calculateShapeDistance } from "./kanji/kanjiComparison.js";
 
 type Theme = "light" | "dark";
 type GridMode = "none" | "four" | "sixteen" | "diagonal";
@@ -19,6 +24,8 @@ const clearButton = document.querySelector<HTMLButtonElement>("#clearButton");
 const drawToolButton = document.querySelector<HTMLButtonElement>("#drawToolButton");
 const eraserToolButton = document.querySelector<HTMLButtonElement>("#eraserToolButton");
 const eraserCursor = document.querySelector<HTMLElement>("#eraserCursor");
+
+const evaluateKanjiButton = document.querySelector<HTMLButtonElement>("#evaluateKanjiButton");
 
 function isGridMode(value: string): value is GridMode {
     return value === "none" || value === "four" || value === "sixteen" || value === "diagonal";
@@ -149,6 +156,7 @@ let lastEraserPoint: Point | null = null;
 let hasErasedInGesture = false;
 const history: Stroke[][] = [];
 const redoHistory: Stroke[][] = [];
+let isEvaluating = false;
 
 function saveHistory(): void {
     const snapshot = strokes.map((stroke) => stroke.map((point) => ({ ...point })));
@@ -179,6 +187,39 @@ function redo(): void {
     updateHistoryButtons();
 }
 
+async function evaluateKanji(): Promise<void> {
+    if (isDrawing || isErasing || isEvaluating || strokes.length === 0) return;
+
+    isEvaluating = true;
+    updateHistoryButtons();
+
+    const drawingSnapshot = strokes.map(stroke =>
+        stroke.map(point => ({ ...point }))
+    );
+
+    try {
+        const svgData = await loadKanjiSvg("./assets/kanji/065e5.svg");
+        const referencePoints = convertKanjiSvgToPoints(svgData);
+
+        const normalizedDrawing = normalizeDrawing(drawingSnapshot, CANVAS_SIZE);
+
+        const preparedUser = prepareKanjiForComparison(normalizedDrawing);
+        const preparedReference = prepareKanjiForComparison(referencePoints);
+
+        const distance = calculateShapeDistance(preparedUser, preparedReference);
+
+        console.log("Kanji evaluated: 日");
+        console.log("User strokes:", drawingSnapshot.length);
+        console.log("Reference strokes:", referencePoints.length);
+        console.log("Shape distance:", distance);
+    } catch (error) {
+        console.error("Kanji evaluation failed:", error);
+    } finally {
+        isEvaluating = false;
+        updateHistoryButtons();
+    }
+}
+
 function clearCanvas(): void {
     if (isDrawing || isErasing || strokes.length === 0) return;
 
@@ -193,6 +234,11 @@ function updateHistoryButtons(): void {
     if (undoButton) undoButton.disabled = isDrawing || isErasing || history.length === 0;
     if (redoButton) redoButton.disabled = isDrawing || isErasing || redoHistory.length === 0;
     if (clearButton) clearButton.disabled = isDrawing || isErasing || strokes.length === 0;
+
+    if (evaluateKanjiButton) {
+        evaluateKanjiButton.disabled = isDrawing || isErasing || isEvaluating || strokes.length === 0;
+    }
+
 }
 
 function setCanvasTool(tool: CanvasTool): void {
@@ -615,6 +661,11 @@ redoButton?.addEventListener("click", redo);
 clearButton?.addEventListener("click", clearCanvas);
 drawToolButton?.addEventListener("click", () => setCanvasTool("draw"));
 eraserToolButton?.addEventListener("click", () => setCanvasTool("erase"));
+
+evaluateKanjiButton?.addEventListener("click", () => {
+    void evaluateKanji();
+});
+
 setCanvasTool(activeTool);
 
 updateHistoryButtons();

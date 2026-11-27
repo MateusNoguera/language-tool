@@ -376,22 +376,27 @@ html:not(.i18n-ready) [data-i18n] {
     pointer-events: none;
     color: var(--text-secondary);
 }
+
 .CanvasGrid path {
     fill: none;
     stroke: currentColor;
     stroke-width: 1;
     stroke-dasharray: 6 6;
 }
+
 .CanvasGrid .GridMajor {
     opacity: 0.4;
 }
+
 .CanvasGrid .GridMinor,
 .CanvasGrid .GridDiagonal {
     opacity: 0.2;
 }
+
 .CanvasGrid path {
     display: none;
 }
+
 .CanvasContainer[data-grid-mode="four"] .GridMajor,
 .CanvasContainer[data-grid-mode="sixteen"] .GridMajor,
 .CanvasContainer[data-grid-mode="sixteen"] .GridMinor,
@@ -427,17 +432,21 @@ html:not(.i18n-ready) [data-i18n] {
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
+
 .CanvasToolButton:hover:not(:disabled) {
     border-color: var(--accent-color);
 }
+
 .CanvasToolButton:focus-visible {
     outline: 2px solid var(--accent-color);
     outline-offset: 2px;
 }
+
 .CanvasToolButton:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
+
 .CanvasToolButton svg {
     width: 20px;
     height: 20px;
@@ -466,9 +475,61 @@ html:not(.i18n-ready) [data-i18n] {
     transform: translate(-50%, -50%);
     pointer-events: none;
 }
+
 .EraserCursor[hidden] {
     display: none;
 }
+
 .CanvasContainer[data-tool="erase"] #kanjiCanvas {
     cursor: none;
+}
+
+.CanvasEvaluation {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 20px;
+}
+
+.CanvasEvaluateButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 20px;
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: 1px solid var(--accent-color);
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.CanvasEvaluateButton:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.CanvasEvaluateButton:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+.CanvasEvaluateButton:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.CanvasEvaluateButton svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }

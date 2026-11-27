@@ -18,7 +18,8 @@ const ptBR = {
     redo: "Refazer",
     clear: "Limpar",
     drawTool: "Desenhar",
-    eraserTool: "Borracha"
+    eraserTool: "Borracha",
+    evaluateKanji: "Avaliar"
 };
 
 type TranslationKey = keyof typeof ptBR;
@@ -46,7 +47,8 @@ export const translations = {
         redo: "Redo",
         clear: "Clear",
         drawTool: "Draw",
-        eraserTool: "Eraser"
+        eraserTool: "Eraser",
+        evaluateKanji: "Evaluate"
     }
 } satisfies Record<"pt-BR" | "en", TranslationDictionary>;
 
